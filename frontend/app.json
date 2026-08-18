@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Boss-Rater",
+    "slug": "tellyourboss",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/boss-rater-logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/boss-rater-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "io.abbeyfields.tellyourboss",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "io.abbeyfields.tellyourboss",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/boss-rater-logo.png"
+    }
+  }
+}
