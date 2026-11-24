@@ -43,7 +43,7 @@ export const DIMENSIONS: Dimension[] = [
     emoji: '🌟',
     title: 'Leadership Style & Vibes',
     blurb: 'How they steer the ship and motivate the crew.',
-    accent: '#FF4D6D',
+    accent: '#0050E2',
     parameters: [
       {
         id: 'leadership-vision',
@@ -112,7 +112,7 @@ export const DIMENSIONS: Dimension[] = [
     emoji: '💬',
     title: 'Communication Style',
     blurb: 'Day-to-day interactions, emails, and meetings.',
-    accent: '#5B3FFF',
+    accent: '#17B3C6',
     parameters: [
       {
         id: 'communication-email',
@@ -181,7 +181,7 @@ export const DIMENSIONS: Dimension[] = [
     emoji: '📋',
     title: 'Feedback Style',
     blurb: 'How they deliver critique — and how they take it.',
-    accent: '#F5B400',
+    accent: '#087F5B',
     parameters: [
       {
         id: 'feedback-delivery',
@@ -250,7 +250,7 @@ export const DIMENSIONS: Dimension[] = [
     emoji: '🧠',
     title: 'Personality & Workspace Vibes',
     blurb: 'The human element and the energy they bring to the floor.',
-    accent: '#12B5A0',
+    accent: '#8B6CF0',
     parameters: [
       {
         id: 'personality-empathy',
@@ -319,7 +319,7 @@ export const DIMENSIONS: Dimension[] = [
     emoji: '🚀',
     title: 'Innovation & Risk Appetite',
     blurb: 'Fresh ideas, room to miss, and whether they fund the bet.',
-    accent: '#FF7A1A',
+    accent: '#E0912B',
     parameters: [
       {
         id: 'innovation-ideas',
@@ -388,7 +388,7 @@ export const DIMENSIONS: Dimension[] = [
     emoji: '🧗',
     title: 'Career Growth & Advocacy',
     blurb: 'How much they care about your trajectory and promotions.',
-    accent: '#E23EC8',
+    accent: '#F08A70',
     parameters: [
       {
         id: 'growth-hype',
@@ -457,7 +457,7 @@ export const DIMENSIONS: Dimension[] = [
     emoji: '🏰',
     title: 'Team Shielding & Politics',
     blurb: 'How well they protect the team from chaos and politics.',
-    accent: '#2D6CFF',
+    accent: '#E4649A',
     parameters: [
       {
         id: 'shielding-defense',
@@ -555,10 +555,104 @@ export function getQuestion(globalIndex: number): QuestionRef | null {
   return null;
 }
 
+export function firstUnansweredIndex(answers: Record<string, number | undefined>): number {
+  for (let i = 0; i < QUESTION_COUNT; i += 1) {
+    const question = getQuestion(i);
+    if (question && answers[question.parameter.id] == null) return i;
+  }
+  return QUESTION_COUNT;
+}
+
+export function dimensionStartIndex(dimensionIndex: number): number {
+  let start = 0;
+  for (let i = 0; i < dimensionIndex; i += 1) {
+    start += DIMENSIONS[i].parameters.length;
+  }
+  return start;
+}
+
+export function dimensionIsComplete(
+  dimension: Dimension,
+  answers: Record<string, number | undefined>,
+): boolean {
+  return dimension.parameters.every((parameter) => answers[parameter.id] != null);
+}
+
+export function lastCompletedDimensionIndex(answers: Record<string, number | undefined>): number {
+  let last = -1;
+  for (let i = 0; i < DIMENSIONS.length; i += 1) {
+    if (!dimensionIsComplete(DIMENSIONS[i], answers)) break;
+    last = i;
+  }
+  return last;
+}
+
 export function isLastInDimension(question: QuestionRef): boolean {
   return question.parameterIndex === question.dimension.parameters.length - 1;
 }
 
 export function isFirstInDimension(question: QuestionRef): boolean {
   return question.parameterIndex === 0;
+}
+
+export function dimensionsByIds(ids: string[] | null | undefined): Dimension[] {
+  if (!ids || ids.length === 0) return DIMENSIONS;
+  const wanted = new Set(ids);
+  const picked = DIMENSIONS.filter((dimension) => wanted.has(dimension.id));
+  return picked.length > 0 ? picked : DIMENSIONS;
+}
+
+export function countQuestions(dimensions: readonly Dimension[]): number {
+  return dimensions.reduce((sum, dimension) => sum + dimension.parameters.length, 0);
+}
+
+export function getQuestionFrom(dimensions: readonly Dimension[], globalIndex: number): QuestionRef | null {
+  if (globalIndex < 0) return null;
+  let remaining = globalIndex;
+  for (let dimensionIndex = 0; dimensionIndex < dimensions.length; dimensionIndex += 1) {
+    const dimension = dimensions[dimensionIndex];
+    if (remaining < dimension.parameters.length) {
+      return {
+        dimensionIndex,
+        parameterIndex: remaining,
+        dimension,
+        parameter: dimension.parameters[remaining],
+        globalIndex,
+      };
+    }
+    remaining -= dimension.parameters.length;
+  }
+  return null;
+}
+
+export function firstUnansweredIn(
+  dimensions: readonly Dimension[],
+  answers: Record<string, number | undefined>,
+): number {
+  const total = countQuestions(dimensions);
+  for (let i = 0; i < total; i += 1) {
+    const question = getQuestionFrom(dimensions, i);
+    if (question && answers[question.parameter.id] == null) return i;
+  }
+  return total;
+}
+
+export function dimensionStartIn(dimensions: readonly Dimension[], dimensionIndex: number): number {
+  let start = 0;
+  for (let i = 0; i < dimensionIndex; i += 1) {
+    start += dimensions[i]?.parameters.length ?? 0;
+  }
+  return start;
+}
+
+export function lastCompletedIn(
+  dimensions: readonly Dimension[],
+  answers: Record<string, number | undefined>,
+): number {
+  let last = -1;
+  for (let i = 0; i < dimensions.length; i += 1) {
+    if (!dimensionIsComplete(dimensions[i], answers)) break;
+    last = i;
+  }
+  return last;
 }

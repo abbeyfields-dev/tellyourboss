@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Relationship {
+  BOSS
+  SKIP_LEVEL
+  PEER
+  REPORT
+  STAKEHOLDER
+  OTHER
+}
+
+enum Gender {
+  WOMAN
+  MAN
+  NONBINARY
+  PREFER_NOT_TO_SAY
+  UNSPECIFIED
+}
+
+enum ScorecardStatus {
+  DRAFT
+  COMPLETED
+}
+
+/// The rater. Scorecards and people are private to this account.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  displayName  String?
+  industry     String?
+  gender       Gender   @default(UNSPECIFIED)
+  country      String?
+  location     String?
+  state        String?
+  postalCode   String?
+  ageGroup     String?
+  ethnicity    String?
+  education    String?
+  tokenVersion Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  refreshTokens  RefreshToken[]
+  passwordResets PasswordReset[]
+  subjects       Subject[]
+  scorecards     Scorecard[]
+  ratingRequests RatingRequest[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// A person this user rates. Not a shared directory — each rater has their own list.
+model Subject {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName  String
+  roleTitle    String?
+  company      String?
+  industry     String?
+  gender       Gender       @default(UNSPECIFIED)
+  country      String?
+  location     String?
+  state        String?
+  postalCode   String?
+  ageGroup     String?
+  ethnicity    String?
+  education    String?
+  relationship Relationship @default(OTHER)
+  notes        String?
+  archivedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  scorecards Scorecard[]
+
+  @@index([userId, archivedAt])
+  @@index([userId, updatedAt(sort: Desc)])
+}
+
+/// One campaign / run for a subject. Drafts are resumable; completed rows are history.
+model Scorecard {
+  id                 String          @id @default(cuid())
+  userId             String
+  subjectId          String
+  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject            Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  status             ScorecardStatus @default(DRAFT)
+  overall            Float?
+  archetype          String?
+  blurb                String?
+  selectedDimensionIds String[] @default([])
+  strongestDimension   String?
+  weakestDimension   String?
+  answeredCount      Int             @default(0)
+  completedAt        DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  ratingRequestId String?        @unique
+  ratingRequest   RatingRequest? @relation(fields: [ratingRequestId], references: [id], onDelete: SetNull)
+
+  answers          ScorecardAnswer[]
+  dimensionScores  ScorecardDimensionScore[]
+  feedbackLinks    FeedbackLink[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([subjectId, createdAt(sort: Desc)])
+  @@index([userId, status])
+}
+
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+/// Someone this user asked to rate them. The email link starts that rating,
+/// and finishing it delivers the scorecard back to this user.
+model RatingRequest {
+  id             String        @id @default(cuid())
+  requesterId    String
+  requester      User          @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+  recipientEmail String
+  tokenHash      String        @unique
+  feedbackLinkId String?       @unique
+  feedbackLink   FeedbackLink? @relation(fields: [feedbackLinkId], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now())
+
+  scorecard Scorecard?
+
+  @@index([requesterId, createdAt(sort: Desc)])
+}
+
+/// Unlisted scorecard link. The URL token only identifies the share.
+/// Scores stay hidden until the recipient email matches and a one-time code is confirmed.
+model FeedbackLink {
+  id             String    @id @default(cuid())
+  scorecardId    String
+  scorecard      Scorecard @relation(fields: [scorecardId], references: [id], onDelete: Cascade)
+  recipientEmail String
+  tokenHash      String    @unique
+  revealSender   Boolean   @default(false)
+  senderLabel    String?
+  codeHash       String?
+  codeExpiresAt  DateTime?
+  attempts       Int       @default(0)
+  viewTokenHash  String?   @unique
+  viewExpiresAt  DateTime?
+  expiresAt      DateTime
+  createdAt      DateTime  @default(now())
+
+  ratingRequest RatingRequest?
+
+  @@index([scorecardId])
+}
+
+model ScorecardAnswer {
+  id          String    @id @default(cuid())
+  scorecardId String
+  scorecard   Scorecard @relation(fields: [scorecardId], references: [id], onDelete: Cascade)
+  parameterId String
+  dimensionId String
+  value       Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([scorecardId, parameterId])
+  @@index([scorecardId])
+}
+
+model ScorecardDimensionScore {
+  id          String    @id @default(cuid())
+  scorecardId String
+  scorecard   Scorecard @relation(fields: [scorecardId], references: [id], onDelete: Cascade)
+  dimensionId String
+  average     Float
+  filled      Int
+
+  @@unique([scorecardId, dimensionId])
+}

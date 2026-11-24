@@ -1,11 +1,11 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { theme } from '../theme';
+import { theme, type } from '../theme';
 
 type Props = {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'accent' | 'ghost';
+  variant?: 'primary' | 'accent' | 'ghost' | 'danger' | 'onBrand' | 'outline';
   disabled?: boolean;
 };
 
@@ -23,8 +23,11 @@ export function PrimaryButton({
         styles.btn,
         variant === 'primary' && styles.primary,
         variant === 'accent' && styles.accent,
+        variant === 'outline' && styles.outline,
         variant === 'ghost' && styles.ghost,
-        disabled && styles.disabled,
+        variant === 'danger' && styles.danger,
+        variant === 'onBrand' && styles.onBrand,
+        disabled && variant !== 'accent' && styles.disabled,
         pressed && !disabled && styles.pressed,
       ]}
       accessibilityRole="button"
@@ -32,8 +35,12 @@ export function PrimaryButton({
       <Text
         style={[
           styles.label,
+          (variant === 'accent' || variant === 'primary') && styles.accentLabel,
+          variant === 'outline' && styles.outlineLabel,
           variant === 'ghost' && styles.ghostLabel,
-          variant === 'accent' && styles.accentLabel,
+          variant === 'danger' && styles.dangerLabel,
+          variant === 'onBrand' && styles.onBrandLabel,
+          disabled && styles.disabledLabel,
         ]}
       >
         {label}
@@ -44,38 +51,64 @@ export function PrimaryButton({
 
 const styles = StyleSheet.create({
   btn: {
-    borderRadius: theme.radius.pill,
-    paddingVertical: 15,
+    minHeight: 52,
+    borderRadius: theme.radius.md,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   primary: {
-    backgroundColor: theme.colors.ink,
+    backgroundColor: theme.colors.brand,
   },
   accent: {
-    backgroundColor: theme.colors.royal,
+    backgroundColor: theme.colors.accent,
+  },
+  outline: {
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1.5,
+    borderColor: theme.colors.border,
   },
   ghost: {
     backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: 'rgba(20, 27, 48, 0.16)',
+  },
+  danger: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  onBrand: {
+    backgroundColor: '#FFFFFF',
   },
   disabled: {
-    opacity: 0.4,
+    opacity: 0.38,
   },
   pressed: {
     opacity: 0.88,
-    transform: [{ scale: 0.98 }],
+    transform: [{ scale: 0.985 }],
   },
   label: {
-    color: theme.colors.onInk,
-    fontWeight: '800',
-    fontSize: 15,
-    letterSpacing: 0.2,
+    ...type.sans,
+    color: theme.colors.ink,
+    fontWeight: '700',
+    fontSize: 16,
   },
   accentLabel: {
-    color: theme.colors.onInk,
+    color: theme.colors.onLime,
+  },
+  outlineLabel: {
+    color: theme.colors.ink,
   },
   ghostLabel: {
-    color: theme.colors.ink,
+    color: theme.colors.textMuted,
+  },
+  dangerLabel: {
+    color: theme.colors.danger,
+  },
+  onBrandLabel: {
+    color: theme.colors.brand,
+  },
+  disabledLabel: {
+    color: theme.colors.onLime,
   },
 });

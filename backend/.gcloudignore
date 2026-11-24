@@ -1,0 +1,9 @@
+.git
+.gitignore
+node_modules
+dist
+.env
+.env.*
+scripts/cloud-sql-proxy
+*.log
+.DS_Store

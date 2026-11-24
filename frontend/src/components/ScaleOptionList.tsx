@@ -1,8 +1,7 @@
 import React from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ScaleOption, ScaleValue } from '../data/dimensions';
-import { theme } from '../theme';
-import { StarRow } from './StarRow';
+import { theme, type } from '../theme';
 
 type Props = {
   options: ScaleOption[];
@@ -10,100 +9,88 @@ type Props = {
   onSelect: (value: ScaleValue) => void;
 };
 
-const RANK_COLORS: Record<ScaleValue, string> = {
-  1: theme.colors.coral,
-  2: theme.colors.tangerine,
-  3: theme.colors.gold,
-  4: theme.colors.teal,
-  5: theme.colors.royal,
+const SCALE_COLOR: Record<ScaleValue, string> = {
+  5: theme.colors.scale5,
+  4: theme.colors.scale4,
+  3: theme.colors.scale3,
+  2: theme.colors.scale2,
+  1: theme.colors.scale1,
 };
 
 export function ScaleOptionList({ options, selected, onSelect }: Props): React.JSX.Element {
+  const ordered = [...options].sort((a, b) => b.value - a.value);
   return (
-    <FlatList
-      style={styles.flex}
-      data={options}
-      keyExtractor={(item) => String(item.value)}
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={styles.list}
-      renderItem={({ item }) => {
+    <View style={styles.list}>
+      {ordered.map((item) => {
         const isSelected = selected === item.value;
-        const color = RANK_COLORS[item.value];
         return (
           <Pressable
+            key={item.value}
             style={({ pressed }) => [
               styles.row,
-              isSelected && [styles.rowSelected, { borderColor: color }],
+              isSelected && styles.rowSelected,
               pressed && styles.rowPressed,
             ]}
             onPress={() => onSelect(item.value)}
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
           >
-            <View style={[styles.badge, { backgroundColor: color }]}>
-              <Text style={styles.badgeText}>{item.value}</Text>
+            <View style={[styles.num, { backgroundColor: SCALE_COLOR[item.value] }]}>
+              <Text style={styles.numText}>{item.value}</Text>
             </View>
-            <View style={styles.copy}>
-              <Text style={styles.title}>{item.label}</Text>
-              <StarRow filled={item.value} size={13} />
-            </View>
-            {isSelected ? <Text style={[styles.check, { color }]}>✓</Text> : null}
+            <Text style={[styles.title, isSelected && styles.titleOn]}>{item.label}</Text>
           </Pressable>
         );
-      }}
-    />
+      })}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
   list: {
-    paddingBottom: theme.space.lg,
     gap: 8,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    minHeight: 62,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.surface,
-    borderWidth: 2,
-    borderColor: 'transparent',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    gap: 14,
   },
   rowSelected: {
-    backgroundColor: theme.colors.royalSoft,
+    backgroundColor: theme.colors.accent,
+    borderColor: theme.colors.accent,
   },
   rowPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.99 }],
+    opacity: 0.92,
   },
-  badge: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+  num: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  badgeText: {
-    color: theme.colors.onInk,
+  numText: {
+    ...type.sans,
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '900',
-    fontSize: 16,
-  },
-  copy: {
-    flex: 1,
-    gap: 3,
   },
   title: {
-    color: theme.colors.text,
+    ...type.sans,
+    flex: 1,
+    color: theme.colors.ink,
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '600',
+    lineHeight: 22,
   },
-  check: {
-    fontSize: 18,
-    fontWeight: '900',
+  titleOn: {
+    color: '#FFFFFF',
   },
 });

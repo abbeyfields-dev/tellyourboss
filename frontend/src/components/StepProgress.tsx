@@ -1,56 +1,41 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { theme } from '../theme';
 
 type Props = {
   total: number;
   current: number;
   color?: string;
+  trackColor?: string;
+  height?: number;
 };
 
 export function StepProgress({
   total,
   current,
-  color = theme.colors.royal,
+  color = theme.colors.limeDeep,
+  trackColor = theme.colors.border,
+  height = 3,
 }: Props): React.JSX.Element {
   const filled = Math.min(total, current + 1);
   const ratio = total === 0 ? 0 : filled / total;
 
   return (
-    <View style={styles.wrap} accessibilityRole="progressbar">
-      <View style={styles.track}>
-        <View style={[styles.fill, { width: `${ratio * 100}%`, backgroundColor: color }]} />
-      </View>
-      <Text style={styles.xp}>
-        {filled} / {total} XP
-      </Text>
+    <View style={[styles.track, { backgroundColor: trackColor, height }]} accessibilityRole="progressbar">
+      <View style={[styles.fill, { width: `${ratio * 100}%`, backgroundColor: color, height }]} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
   track: {
-    flex: 1,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: 'rgba(20, 27, 48, 0.08)',
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: theme.colors.border,
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    borderRadius: 5,
-  },
-  xp: {
-    color: theme.colors.textDim,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.3,
-    minWidth: 58,
-    textAlign: 'right',
+    borderRadius: 2,
   },
 });

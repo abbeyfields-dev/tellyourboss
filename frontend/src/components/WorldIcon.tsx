@@ -22,32 +22,40 @@ export function worldShortName(id: string, fallback: string): string {
   return SHORT_NAME[id] ?? fallback;
 }
 
-/** Geometric world marks — no emoji fonts, so they cannot tofu. */
+/** Restrained geometric marks — no emoji, no cartoon faces. */
 export function WorldIcon({ id, color = theme.colors.royal, size = 22 }: Props): React.JSX.Element {
-  const inset = Math.max(4, Math.round(size * 0.22));
+  const inset = Math.max(5, Math.round(size * 0.26));
 
   return (
     <View
       style={[
         styles.badge,
-        { width: size, height: size, borderRadius: size * 0.34, backgroundColor: color },
+        {
+          width: size,
+          height: size,
+          borderRadius: size * 0.3,
+          backgroundColor: 'transparent',
+          borderWidth: 0,
+          borderColor: 'transparent',
+        },
       ]}
       accessibilityLabel={worldShortName(id, id)}
     >
-      <Mark id={id} size={size - inset * 2} />
+      <Mark id={id} size={size - inset * 2} color={color} />
     </View>
   );
 }
 
-function Mark({ id, size }: { id: string; size: number }): React.JSX.Element {
+function Mark({ id, size, color }: { id: string; size: number; color: string }): React.JSX.Element {
   switch (id) {
     case 'leadership':
       return (
         <View
           style={{
-            width: size * 0.72,
-            height: size * 0.72,
-            backgroundColor: theme.colors.onInk,
+            width: size * 0.7,
+            height: size * 0.7,
+            borderWidth: 2,
+            borderColor: color,
             transform: [{ rotate: '45deg' }],
             borderRadius: 2,
           }}
@@ -55,77 +63,39 @@ function Mark({ id, size }: { id: string; size: number }): React.JSX.Element {
       );
     case 'communication':
       return (
-        <View style={{ width: size, height: size, justifyContent: 'center' }}>
-          <View
-            style={{
-              width: size * 0.78,
-              height: size * 0.48,
-              borderRadius: size,
-              backgroundColor: theme.colors.onInk,
-              alignSelf: 'center',
-            }}
-          />
-          <View
-            style={{
-              position: 'absolute',
-              left: size * 0.18,
-              bottom: size * 0.08,
-              width: 0,
-              height: 0,
-              borderTopWidth: size * 0.22,
-              borderTopColor: theme.colors.onInk,
-              borderLeftWidth: size * 0.18,
-              borderLeftColor: 'transparent',
-            }}
-          />
-        </View>
+        <View
+          style={{
+            width: size * 0.78,
+            height: size * 0.5,
+            borderRadius: size,
+            borderWidth: 2,
+            borderColor: color,
+          }}
+        />
       );
     case 'feedback':
       return (
         <View
           style={{
-            width: size * 0.62,
-            height: size * 0.78,
+            width: size * 0.58,
+            height: size * 0.74,
             borderRadius: 3,
-            backgroundColor: theme.colors.onInk,
+            borderWidth: 2,
+            borderColor: color,
           }}
-        >
-          <View
-            style={{
-              alignSelf: 'center',
-              marginTop: -size * 0.08,
-              width: size * 0.34,
-              height: size * 0.14,
-              borderRadius: 2,
-              backgroundColor: theme.colors.onInk,
-              borderWidth: 1.5,
-              borderColor: 'transparent',
-            }}
-          />
-        </View>
+        />
       );
     case 'personality':
       return (
-        <View style={{ alignItems: 'center' }}>
-          <View
-            style={{
-              width: size * 0.42,
-              height: size * 0.42,
-              borderRadius: size,
-              backgroundColor: theme.colors.onInk,
-            }}
-          />
-          <View
-            style={{
-              marginTop: size * 0.06,
-              width: size * 0.72,
-              height: size * 0.28,
-              borderTopLeftRadius: size,
-              borderTopRightRadius: size,
-              backgroundColor: theme.colors.onInk,
-            }}
-          />
-        </View>
+        <View
+          style={{
+            width: size * 0.62,
+            height: size * 0.62,
+            borderRadius: size,
+            borderWidth: 2,
+            borderColor: color,
+          }}
+        />
       );
     case 'innovation':
       return (
@@ -133,61 +103,83 @@ function Mark({ id, size }: { id: string; size: number }): React.JSX.Element {
           style={{
             width: 0,
             height: 0,
-            borderLeftWidth: size * 0.38,
-            borderRightWidth: size * 0.38,
-            borderBottomWidth: size * 0.72,
+            borderLeftWidth: size * 0.34,
+            borderRightWidth: size * 0.34,
+            borderBottomWidth: size * 0.62,
             borderLeftColor: 'transparent',
             borderRightColor: 'transparent',
-            borderBottomColor: theme.colors.onInk,
+            borderBottomColor: color,
           }}
         />
       );
     case 'growth':
       return (
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: size * 0.1, height: size }}>
-          <View style={{ width: size * 0.22, height: size * 0.38, borderRadius: 2, backgroundColor: theme.colors.onInk }} />
-          <View style={{ width: size * 0.22, height: size * 0.58, borderRadius: 2, backgroundColor: theme.colors.onInk }} />
-          <View style={{ width: size * 0.22, height: size * 0.82, borderRadius: 2, backgroundColor: theme.colors.onInk }} />
+          <View style={{ width: 3, height: size * 0.36, borderRadius: 1, backgroundColor: color }} />
+          <View style={{ width: 3, height: size * 0.54, borderRadius: 1, backgroundColor: color }} />
+          <View style={{ width: 3, height: size * 0.76, borderRadius: 1, backgroundColor: color }} />
         </View>
       );
     case 'shielding':
       return (
-        <View style={{ alignItems: 'center' }}>
-          <View
-            style={{
-              width: size * 0.7,
-              height: size * 0.5,
-              backgroundColor: theme.colors.onInk,
-              borderTopLeftRadius: 3,
-              borderTopRightRadius: 3,
-            }}
-          />
-          <View
-            style={{
-              width: 0,
-              height: 0,
-              borderLeftWidth: size * 0.35,
-              borderRightWidth: size * 0.35,
-              borderTopWidth: size * 0.32,
-              borderLeftColor: 'transparent',
-              borderRightColor: 'transparent',
-              borderTopColor: theme.colors.onInk,
-            }}
-          />
-        </View>
+        <View
+          style={{
+            width: size * 0.62,
+            height: size * 0.7,
+            borderWidth: 2,
+            borderColor: color,
+            borderBottomLeftRadius: size,
+            borderBottomRightRadius: size,
+            borderTopLeftRadius: 3,
+            borderTopRightRadius: 3,
+          }}
+        />
       );
     default:
       return (
         <View
           style={{
-            width: size * 0.45,
-            height: size * 0.45,
+            width: size * 0.42,
+            height: size * 0.42,
             borderRadius: size,
-            backgroundColor: theme.colors.onInk,
+            borderWidth: 2,
+            borderColor: color,
           }}
         />
       );
   }
+}
+
+export function BrandMark({ size = 18 }: { size?: number }): React.JSX.Element {
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: theme.colors.lime,
+        borderRadius: size * 0.2,
+        transform: [{ rotate: '45deg' }],
+      }}
+    />
+  );
+}
+
+export function OutlineHex({ color, size = 16 }: { color: string; size?: number }): React.JSX.Element {
+  const inner = size * 0.62;
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          width: inner,
+          height: inner,
+          borderWidth: 2,
+          borderColor: color,
+          borderRadius: 3,
+          transform: [{ rotate: '45deg' }],
+        }}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

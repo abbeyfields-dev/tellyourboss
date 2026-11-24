@@ -1,100 +1,102 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { theme, type } from '../theme';
 import { StepProgress } from './StepProgress';
-import { WorldIcon } from './WorldIcon';
 
 type Props = {
-  badge: string;
   title: string;
-  worldId?: string;
-  accent?: string;
-  total: number;
+  subjectName?: string | null;
   current: number;
-  backLabel: string;
-  onBack: () => void;
+  total: number;
+  stageCurrent: number;
+  stageTotal?: number;
+  questionIndex: number;
+  questionTotal: number;
+  onClose?: () => void;
+  onHome?: () => void;
 };
 
 export function GameHud({
-  badge,
   title,
-  worldId,
-  accent = theme.colors.royal,
-  total,
-  current,
-  backLabel,
-  onBack,
+  current: _current,
+  total: _total,
+  stageCurrent,
+  stageTotal = 7,
+  questionIndex,
+  questionTotal,
+  onClose,
+  onHome,
+  subjectName,
 }: Props): React.JSX.Element {
   return (
     <View style={styles.wrap}>
       <View style={styles.top}>
-        <View style={styles.copy}>
-          <View style={[styles.badge, { backgroundColor: accent }]}>
-            <Text style={styles.badgeText}>{badge}</Text>
+        <Text style={styles.who} numberOfLines={1}>
+          {subjectName || 'Rating'}
+        </Text>
+        <Pressable onPress={onHome ?? onClose} hitSlop={10} accessibilityRole="button">
+          <View style={styles.exit}>
+            <Text style={styles.exitText}>Save & exit</Text>
           </View>
-          <View style={styles.titleRow}>
-            {worldId ? <WorldIcon id={worldId} color={accent} size={18} /> : null}
-            <Text style={styles.title} numberOfLines={1}>
-              {title}
-            </Text>
-          </View>
-        </View>
-        <Pressable onPress={onBack} hitSlop={8} style={styles.backBtn}>
-          <Text style={styles.back}>{backLabel}</Text>
         </Pressable>
       </View>
-      <StepProgress total={total} current={current} color={accent} />
+      <Text style={styles.meta}>
+        Category {stageCurrent + 1} of {stageTotal} · {title}
+      </Text>
+      <StepProgress
+        total={questionTotal}
+        current={questionIndex}
+        color={theme.colors.accent}
+        trackColor={theme.colors.brandSoft}
+        height={6}
+      />
+      <Text style={styles.count}>
+        Question {questionIndex + 1} of {questionTotal}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: {
-    gap: 12,
-    marginBottom: theme.space.md,
+    gap: 8,
+    marginBottom: 12,
   },
   top: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
+    minHeight: 28,
   },
-  copy: {
+  who: {
+    ...type.sans,
     flex: 1,
-    gap: 6,
+    color: theme.colors.ink,
+    fontSize: 18,
+    fontWeight: '800',
   },
-  badge: {
-    alignSelf: 'flex-start',
+  exit: {
+    backgroundColor: theme.colors.brandSoft,
     borderRadius: theme.radius.pill,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  badgeText: {
-    color: theme.colors.onInk,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  title: {
-    flex: 1,
-    color: theme.colors.ink,
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  backBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.surface,
-  },
-  back: {
-    color: theme.colors.ink,
+  exitText: {
+    ...type.sans,
+    color: theme.colors.accent,
+    fontSize: 11,
     fontWeight: '700',
-    fontSize: 13,
+  },
+  meta: {
+    ...type.sans,
+    color: theme.colors.accent,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  count: {
+    ...type.sans,
+    color: theme.colors.textMuted,
+    fontSize: 12,
   },
 });

@@ -13,14 +13,14 @@ export function QuizStats({ completed, lastOverall, lastArchetype }: Props): Rea
   return (
     <View style={styles.row}>
       <View style={styles.chip}>
-        <Text style={styles.label}>Campaigns</Text>
+        <Text style={styles.label}>Ratings</Text>
         <Text style={styles.value}>{completed}</Text>
       </View>
       <View style={[styles.chip, styles.chipWide]}>
         <Text style={styles.label}>Last rank</Text>
         <Text style={styles.last} numberOfLines={2}>
           {lastOverall == null
-            ? 'No clears yet — start the first run.'
+            ? 'No ratings yet — start the first one.'
             : `${formatScore(lastOverall)} · ${lastArchetype ?? 'Rated'}`}
         </Text>
       </View>

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, Animated, Image, StyleSheet, Text, View } from 'react-native';
-import { brandLogo } from '../brand';
-import { theme } from '../theme';
+import { Animated, StyleSheet, Text, View } from 'react-native';
+import { TAGLINE } from '../brand';
+import { theme, type } from '../theme';
+import { BrandLogo } from './BrandLogo';
 
 type Props = {
   ready: boolean;
@@ -32,12 +33,9 @@ export function SplashScreen({ ready, onFinished }: Props): React.JSX.Element {
     <View style={styles.wrap} accessibilityRole="image">
       <StatusBar style="dark" />
       <Animated.View style={[styles.logoWrap, { opacity, transform: [{ scale }] }]}>
-        <Image source={brandLogo} style={styles.logo} resizeMode="contain" accessibilityLabel="Boss-Rater" />
+        <BrandLogo width={280} />
+        <Text style={styles.tagline}>{TAGLINE}</Text>
       </Animated.View>
-      <View style={styles.boot}>
-        <ActivityIndicator color={theme.colors.royal} />
-        <Text style={styles.bootLabel}>{ready ? 'Entering the campaign' : 'Preparing your campaign'}</Text>
-      </View>
     </View>
   );
 }
@@ -45,30 +43,20 @@ export function SplashScreen({ ready, onFinished }: Props): React.JSX.Element {
 const styles = StyleSheet.create({
   wrap: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F7F4EF',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: theme.space.lg,
   },
   logoWrap: {
-    width: '100%',
-    maxWidth: 360,
     alignItems: 'center',
+    gap: 16,
+    zIndex: 1,
   },
-  logo: {
-    width: '100%',
-    height: 220,
-  },
-  boot: {
-    position: 'absolute',
-    bottom: 56,
-    alignItems: 'center',
-    gap: 10,
-  },
-  bootLabel: {
-    color: theme.colors.ink,
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 0.4,
+  tagline: {
+    ...type.sans,
+    color: theme.colors.textMuted,
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

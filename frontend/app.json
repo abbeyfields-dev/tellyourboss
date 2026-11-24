@@ -1,10 +1,11 @@
 {
   "expo": {
-    "name": "Boss-Rater",
+    "name": "Boss-O-Rater",
     "slug": "tellyourboss",
+    "owner": "navayro-founders",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/boss-rater-logo.png",
+    "icon": "./assets/boss-rater-icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/boss-rater-logo.png",
@@ -13,14 +14,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "io.abbeyfields.tellyourboss",
+      "bundleIdentifier": "com.navayro.bossorater",
       "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "io.abbeyfields.tellyourboss",
+      "package": "com.navayro.bossorater",
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -29,7 +30,17 @@
       }
     },
     "web": {
-      "favicon": "./assets/boss-rater-logo.png"
+      "favicon": "./assets/boss-rater-icon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8d201f6c-7b41-4457-80d3-e5bb20f574f0"
+      }
+    },
+    "experiments": {
+      "baseUrl": ""
     }
   }
 }

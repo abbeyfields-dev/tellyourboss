@@ -1,64 +1,112 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import type { Dimension } from '../data/dimensions';
 import { formatScore } from '../data/score';
-import { rankTitle, starCount, theme } from '../theme';
+import { theme, type } from '../theme';
+import { FadeMount } from './FadeMount';
 import { PrimaryButton } from './PrimaryButton';
-import { StarRow } from './StarRow';
-import { WorldIcon } from './WorldIcon';
 
 type Props = {
   dimension: Dimension;
   worldIndex: number;
   worldTotal: number;
   average: number;
+  comment: string;
   nextDimension: Dimension | null;
+  completedThrough: number;
   onContinue: () => void;
+  onSelectSection: (worldIndex: number) => void;
+  onReview: () => void;
+  onSaveLater: () => void;
+  userInitial?: string;
+  onAvatarPress?: () => void;
 };
+
+const RING = 168;
+const STROKE = 12;
+
+function ScoreRing({ score, color }: { score: number; color: string }): React.JSX.Element {
+  const radius = (RING - STROKE) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const progress = Math.max(0.04, Math.min(1, score / 5));
+  const dash = circumference * progress;
+  const center = RING / 2;
+  return (
+    <View style={styles.ringWrap}>
+      <Svg width={RING} height={RING}>
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={`${color}22`}
+          strokeWidth={STROKE}
+          fill="none"
+        />
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={color}
+          strokeWidth={STROKE}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${circumference - dash}`}
+          transform={`rotate(-90 ${center} ${center})`}
+        />
+      </Svg>
+      <View style={styles.ringLabel}>
+        <Text style={styles.score}>{formatScore(score)}</Text>
+        <Text style={styles.outOf}>/ 5</Text>
+      </View>
+    </View>
+  );
+}
 
 export function RecapPanel({
   dimension,
   worldIndex,
   worldTotal,
   average,
+  comment,
   nextDimension,
   onContinue,
+  onReview,
+  onSaveLater,
 }: Props): React.JSX.Element {
-  const stars = starCount(average);
+  const color = dimension.accent;
 
   return (
-    <View style={styles.wrap}>
-      <View style={[styles.banner, { backgroundColor: dimension.accent }]}>
-        <Text style={styles.bannerLabel}>World {worldIndex + 1} cleared</Text>
-        <Text style={styles.bannerRank}>{rankTitle(average)}</Text>
-      </View>
-      <View style={styles.body}>
-        <WorldIcon id={dimension.id} color={dimension.accent} size={56} />
-        <Text style={styles.title}>{dimension.title}</Text>
-        <StarRow filled={stars} size={28} />
-        <Text style={[styles.score, { color: dimension.accent }]}>{formatScore(average)}</Text>
-        <Text style={styles.outOf}>out of 5 · {stars}-star clear</Text>
-        <Text style={styles.blurb}>{dimension.blurb}</Text>
-        {nextDimension ? (
-          <View style={styles.next}>
-            <Text style={styles.nextLabel}>
-              Next world {worldIndex + 2} / {worldTotal}
+    <FadeMount>
+      <View style={styles.wrap}>
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          <View style={[styles.tag, { backgroundColor: `${color}18` }]}>
+            <Text style={[styles.tagText, { color }]}>
+              Category {worldIndex + 1} of {worldTotal} complete
             </Text>
-            <View style={styles.nextTitleRow}>
-              <WorldIcon id={nextDimension.id} color={nextDimension.accent} size={18} />
-              <Text style={styles.nextTitle}>{nextDimension.title}</Text>
-            </View>
           </View>
-        ) : (
-          <Text style={styles.nextLabel}>Final scorecard is next.</Text>
-        )}
+          <Text style={styles.title}>{dimension.title}</Text>
+          <ScoreRing score={average} color={color} />
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Summary</Text>
+            <Text style={styles.cardCopy}>{comment}</Text>
+          </View>
+          <View style={styles.action}>
+            <PrimaryButton
+              variant="accent"
+              label={nextDimension ? 'Next category' : 'See the scorecard'}
+              onPress={onContinue}
+            />
+          </View>
+          <Pressable onPress={onReview} accessibilityRole="button" hitSlop={8} style={styles.linkHit}>
+            <Text style={styles.link}>Review this category</Text>
+          </Pressable>
+          <Pressable onPress={onSaveLater} accessibilityRole="button" hitSlop={8} style={styles.linkHit}>
+            <Text style={styles.link}>Save for later</Text>
+          </Pressable>
+        </ScrollView>
       </View>
-      <PrimaryButton
-        variant="accent"
-        label={nextDimension ? 'Continue campaign' : 'See the scorecard'}
-        onPress={onContinue}
-      />
-    </View>
+    </FadeMount>
   );
 }
 
@@ -66,78 +114,85 @@ const styles = StyleSheet.create({
   wrap: {
     flex: 1,
     minHeight: 0,
-    justifyContent: 'center',
-    gap: theme.space.md,
   },
-  banner: {
-    borderRadius: theme.radius.md,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+  scroll: {
     alignItems: 'center',
-    gap: 2,
+    paddingTop: 12,
+    paddingBottom: 28,
+    gap: 16,
   },
-  bannerLabel: {
-    color: 'rgba(255,255,255,0.84)',
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+  tag: {
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  bannerRank: {
-    color: theme.colors.onInk,
-    fontSize: 20,
-    fontWeight: '900',
-  },
-  body: {
-    alignItems: 'center',
-    gap: 8,
+  tagText: {
+    ...type.sans,
+    fontSize: 13,
+    fontWeight: '700',
   },
   title: {
+    ...type.verdict,
     color: theme.colors.ink,
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 32,
+    lineHeight: 38,
     textAlign: 'center',
+  },
+  ringWrap: {
+    width: RING,
+    height: RING,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 4,
+  },
+  ringLabel: {
+    position: 'absolute',
+    alignItems: 'center',
   },
   score: {
-    fontSize: 48,
-    fontWeight: '900',
-    lineHeight: 52,
+    ...type.verdict,
+    color: theme.colors.ink,
+    fontSize: 44,
+    lineHeight: 48,
   },
   outOf: {
-    color: theme.colors.textDim,
-    fontSize: 13,
+    ...type.sans,
+    color: theme.colors.textMuted,
+    fontSize: 16,
     fontWeight: '600',
+    marginTop: -2,
   },
-  blurb: {
+  card: {
+    alignSelf: 'stretch',
+    backgroundColor: '#F3F5FB',
+    borderRadius: theme.radius.lg,
+    padding: 16,
+    gap: 6,
+  },
+  cardTitle: {
+    ...type.sans,
+    color: theme.colors.ink,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  action: {
+    alignSelf: 'stretch',
+    marginTop: 4,
+  },
+  cardCopy: {
+    ...type.sans,
     color: theme.colors.textMuted,
     fontSize: 15,
-    lineHeight: 21,
-    textAlign: 'center',
-    marginBottom: 4,
+    lineHeight: 22,
   },
-  next: {
-    width: '100%',
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.md,
-    padding: 12,
-    gap: 4,
-  },
-  nextLabel: {
-    color: theme.colors.royal,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-  },
-  nextTitleRow: {
-    flexDirection: 'row',
+  linkHit: {
     alignItems: 'center',
-    gap: 8,
+    paddingVertical: 2,
   },
-  nextTitle: {
-    flex: 1,
-    color: theme.colors.text,
-    fontSize: 14,
-    fontWeight: '700',
+  link: {
+    ...type.sans,
+    color: theme.colors.textMuted,
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
